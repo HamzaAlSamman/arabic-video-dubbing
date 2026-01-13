@@ -1,275 +1,103 @@
+# 🎥 AI Video Dubbing to Arabic (Colab Edition)
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HamzaAlSamman/arabic-video-dubbing/blob/main/AI_Dubbing_System.ipynb)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-success)
+
+> **Note:** This project is designed to run seamlessly on **Google Colab** using T4 GPUs.
+
+A comprehensive, end-to-end pipeline to convert any educational or general video into a **Modern Standard Arabic (MSA)** dubbed version. The system leverages state-of-the-art AI models for vocal isolation, transcription, translation, and speech synthesis, requiring **zero local setup**.
 
 ---
 
-```
-# مشروع دبلجة الفيديوهات إلى العربية باستخدام Google Colab
-
-مشروع متكامل لتحويل أي فيديو تعليمي (أو عام) إلى نسخة **مدبلجة بالعربية الفصحى**، باستخدام أحدث تقنيات الذكاء الاصطناعي، ويعمل بالكامل على **Google Colab** بدون الحاجة لإعدادات محلية معقدة.
-
-يشمل المشروع:
-- استخراج الصوت من الفيديو
-- تنقية الصوت وعزل الكلام البشري
-- التفريغ النصي (ASR) باستخدام WhisperX
-- إعادة الصياغة والترجمة العربية المناسبة للدبلجة
-- تحويل النص إلى صوت عربي (TTS)
-- دمج الصوت مع الفيديو وإخراج نسخة نهائية مدبلجة
+## 📑 Table of Contents
+- [Demo](#-demo)
+- [Pipeline Overview](#-pipeline-overview)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Setup & Usage](#-setup--usage)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
-## ✨ المزايا الرئيسية
+## 🎬 Demo
 
-- يعمل مباشرة على **Google Colab**
-- دعم GPU تلقائي (مع fallback إلى CPU)
-- ترجمة عربية فصحى مخصصة للدبلجة (وليست ترجمة حرفية)
-- ضبط النص ليلائم الزمن الحقيقي للفيديو
-- دعم مزودي ذكاء اصطناعي مختلفين (Groq / Gemini)
-- دعم أكثر من مزود صوت (Edge TTS / ElevenLabs)
-- التعامل الصحيح مع اتجاه العربية (RTL)
-- عدم تخزين مفاتيح API داخل الكود (استخدام `.env`)
+> *Watch a sample output comparing the original video with the AI-dubbed Arabic version.*
+
+*(Replace this line with a link to your YouTube video or a GIF)*
 
 ---
 
-## 🧠 التقنيات المستخدمة
+## 🔄 Pipeline Overview
 
-- **FFmpeg**: لفصل الصوت ودمج الفيديو
-- **Demucs**: لعزل الصوت البشري (Vocals)
-- **WhisperX**: للتفريغ النصي المتزامن (SRT)
-- **نماذج LLM**: لإعادة صياغة النص العربي (Groq / Gemini)
-- **TTS**: لتحويل النص العربي إلى صوت
-- **Google Colab**: بيئة التشغيل
+The automated process follows these 6 stages:
 
----
-
-## 📦 المتطلبات
-
-قبل البدء تأكد من توفر:
-
-- حساب Google (لاستخدام Google Colab وGoogle Drive)
-- فيديو يحتوي على صوت (MP4 / MOV / MKV / AVI / WEBM)
-- مفاتيح API حسب ما ستستخدم:
-  - `GROQ_API_KEY` أو `GEMINI_API_KEY`
-  - `ELEVEN_API_KEY` (في حال استخدام ElevenLabs)
-- يفضّل تشغيل الدفتر على **GPU**:
-  - Runtime → Change runtime type → GPU
+1.  **Audio Extraction:** `FFmpeg` separates audio tracks from the video file.
+2.  **Vocal Isolation:** `Demucs` removes background noise and music, isolating human speech.
+3.  **Transcription (ASR):** `WhisperX` generates precise, timestamped subtitles.
+4.  **Translation & Paraphrasing:** LLMs (`Groq`/`Gemini`) convert text to context-aware Arabic suitable for dubbing.
+5.  **Text-to-Speech (TTS):** `EdgeTTS` or `ElevenLabs` generates the Arabic voiceover.
+6.  **Dubbing:** The new audio is merged with the original video (with background noise re-mixed if desired).
 
 ---
 
-## 🔐 إنشاء ملف `.env` (إجباري)
+## ✨ Key Features
 
-المشروع يقرأ مفاتيح API من ملف `.env` لأسباب أمنية.
-
-### الطريقة الأسهل داخل Google Colab
-
-1. افتح تبويب **Files** في Colab
-2. أنشئ ملفاً جديداً باسم:
-```
-
-.env
-
-````
-3. ضع داخله المفاتيح بهذا الشكل:
-
-```
-GROQ_API_KEY=YOUR_GROQ_KEY_HERE
-GEMINI_API_KEY=YOUR_GEMINI_KEY_HERE
-ELEVEN_API_KEY=YOUR_ELEVEN_KEY_HERE
-````
-
-📌 المسار الافتراضي:
-
-```
-/content/.env
-```
-
-> ⚠️ **لا تقم أبداً برفع ملف `.env` إلى GitHub**
+-   🚀 **Google Colab Native:** Zero local installation required.
+-   ⚡ **Hardware Acceleration:** Optimized for T4 GPUs with CPU fallback.
+-   🗣️ **Smart Translation:** Context-aware translation tailored for dubbing (not literal).
+-   ⏱️ **Timing Adjustment:** Logic to fit the Arabic audio within original timestamps.
+-   🤖 **Multi-LLM Support:** Flexible choice between **Groq** (Fast) or **Gemini** (High Context).
+-   🎙️ **Multi-TTS Support:** Support for **Edge TTS** (Free) and **ElevenLabs** (Premium).
+-   ↔️ **RTL Support:** Proper rendering and handling of Arabic text.
+-   🔒 **Secure:** API keys managed via `.env` file.
 
 ---
 
-## ▶️ طريقة التشغيل (الترتيب مهم)
+## 🧠 Tech Stack
 
-### 1️⃣ إعداد المشروع
-
-* شغّل الخلية:
-  **0) Setup Project Folders + (Optional) Mount Drive**
-* سيتم إنشاء مجلدات المشروع وربط Google Drive (إن اخترت ذلك)
-
----
-
-### 2️⃣ إدخال الفيديو
-
-* شغّل:
-  **1) Select video source + pick file_id**
-* اختر طريقة الإدخال:
-
-  * `upload_now` لرفع فيديو من جهازك
-* بعد ظهور جدول الفيديوهات:
-
-  * شغّل:
-    **1.1) Enter input File ID**
-  * أدخل رقم الفيديو الصحيح
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| **Environment** | Google Colab | Runtime & GPU |
+| **Processing** | FFmpeg | Audio/Video manipulation |
+| **Separation** | Demucs (Facebook) | Vocal Isolation |
+| **ASR** | WhisperX | Transcription & Alignment |
+| **LLM** | Groq / Gemini Pro | Translation & Logic |
+| **TTS** | EdgeTTS / ElevenLabs | Voice Generation |
 
 ---
 
-### 3️⃣ فصل الصوت عن الفيديو
+## 📦 Prerequisites
 
-* شغّل:
-  **1.2) Separate audio from video using FFmpeg**
-* سيتم إنشاء:
+Before running the notebook, ensure you have:
 
-  * فيديو بدون صوت
-  * ملفات صوت جاهزة للمعالجة
-
----
-
-### 4️⃣ عزل الصوت البشري (Demucs)
-
-* شغّل:
-
-  * **2.0) Install Demucs**
-  * **Fix torchaudio save error (torchcodec)**
-  * **2.1) Demucs (vocals only)**
+1.  A **Google Account** (for Colab & Drive).
+2.  A source video file (`.mp4`, `.mov`, `.mkv`, `.avi`).
+3.  **API Keys** (At least one LLM key is required):
+    * [Groq API Key](https://console.groq.com/) OR [Gemini API Key](https://aistudio.google.com/).
+    * *(Optional)* [ElevenLabs API Key](https://elevenlabs.io/) for premium voices.
 
 ---
 
-### 5️⃣ تنقية الصوت (اختياري لكنه مهم)
+## 🛠 Setup & Usage
 
-* شغّل:
-  **2.2) Speech Noise Separation Model**
-* تأكد من وجود ملف الأوزان:
+### 1. Open in Colab
+Click the "Open in Colab" badge at the top of this README.
 
-  ```
-  best_model.pth
-  ```
-* ثم شغّل:
-  **2.21) Sanity check**
+### 2. Set Runtime to GPU
+In the Colab menu: `Runtime` → `Change runtime type` → `T4 GPU`.
 
----
+### 3. Create `.env` File (Mandatory)
+For security, create a file named `.env` inside the Colab **Files** section and add your keys:
 
-### 6️⃣ استخراج الترجمة الإنجليزية (WhisperX)
+```env
+# LLM Providers (Choose at least one)
+GROQ_API_KEY=gsk_...
+GEMINI_API_KEY=AIza...
 
-* شغّل:
-
-  * **2.25) Create/Repair WhisperX venv**
-  * **2.3) WhisperX ASR + Align**
-* الناتج:
-
-  ```
-  original_en.srt
-  ```
-
----
-
-### 7️⃣ إعداد مزود الترجمة (LLM)
-
-* شغّل:
-  **3.0) User Settings (Provider + API Key)**
-* اختر:
-
-  * `groq` أو `gemini`
-* يتم تحميل المفتاح من `.env`
-
----
-
-### 8️⃣ إنشاء ترجمة عربية مناسبة للدبلجة
-
-* شغّل:
-
-  * **3.1) Arabic dubbing rewrite for SRT**
-  * **3.2) Build TTS-SRT**
-* الناتج:
-
-  * ترجمة عربية منسجمة مع زمن الفيديو
-
----
-
-### 9️⃣ إعداد مزود الصوت (TTS)
-
-* شغّل:
-  **4.0) TTS Provider Settings**
-* اختر:
-
-  * `edge` أو `elevenlabs`
-
----
-
-### 🔟 توليد صوت الدبلجة
-
-* شغّل:
-  **4.1) Build Dub Vocals from Arabic SRT**
-* سيتم إنشاء صوت عربي مضبوط زمنياً
-
----
-
-### 1️⃣1️⃣ دمج الصوت مع الخلفية
-
-* شغّل:
-  **4.2) Mix Background + Dub Vocals**
-* الناتج:
-
-  ```
-  final_mix.wav
-  ```
-
----
-
-### 1️⃣2️⃣ إصلاح اتجاه العربية وإخراج الفيديو
-
-* إصلاح RTL:
-  **Fix Arabic RTL in SRT**
-* إخراج الفيديو:
-  **4.3) Render Final Dubbed Video (MP4)**
-
----
-
-### 1️⃣3️⃣ حفظ وتنزيل النتائج
-
-* شغّل:
-  **4.4) Copy to Drive + Download**
-
----
-
-## 📁 الملفات النهائية
-
-بعد اكتمال التشغيل ستحصل على:
-
-* 🎥 `*_dubbed.mp4` — الفيديو المدبلج النهائي
-* 🔊 `final_mix.wav` — الصوت النهائي
-* 📝 `*_rtl_fixed.srt` — ترجمة عربية باتجاه صحيح
-
----
-
-## 🚫 ملفات لا يجب رفعها إلى GitHub
-
-تأكد من وجود `.gitignore` وعدم رفع:
-
-* `.env`
-* ملفات الصوت والفيديو الناتجة
-* مجلدات التشغيل المؤقتة (`work/`, `output/`)
-
----
-
-## 📌 ملاحظات مهمة
-
-* يجب تشغيل الخلايا بالترتيب
-* أي تعديل على `.env` يتطلب إعادة تشغيل خطوة 3.0 أو 4.0
-* في حال فشل GPU، النظام ينتقل تلقائياً إلى CPU
-* المشروع مناسب للفيديوهات التعليمية، التقنية، والطبية
-
----
-
-## 📄 الترخيص
-
-هذا المشروع مخصص للأغراض التعليمية والبحثية.
-يرجى الالتزام بشروط استخدام الأدوات والخدمات الخارجية (WhisperX، Groq، Gemini، ElevenLabs).
-
----
-
-## 🤝 المساهمة
-
-نرحب بالمساهمات والتحسينات.
-يمكنك فتح Issue أو Pull Request في المستودع.
-
----
-
-```
-
+# TTS Providers (Optional)
+ELEVEN_API_KEY=xi...
