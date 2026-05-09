@@ -421,17 +421,8 @@ This project builds on the incredible work of:
 
 ---
 
-## 📧 Contact
-
-For questions, suggestions, or collaboration:
-- Open an [issue](https://github.com/<your-username>/<repo>/issues)
-- Start a [discussion](https://github.com/<your-username>/<repo>/discussions)
-
----
-
 <div align="center">
 
-**⭐ If this project helps you, please consider giving it a star! ⭐**
 
 Made with ❤️ for the Arabic-speaking community
 
