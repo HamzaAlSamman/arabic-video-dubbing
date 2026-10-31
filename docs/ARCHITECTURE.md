@@ -1,40 +1,43 @@
-# Proposed modular architecture (initial foundation)
+# المعمارية البرمجية لمنظومة الدبلجة
 
-The new `src/arabic_dubbing/` is a **testable core**, not a finished dubbing product.
+## الهدف الهندسي
 
-## Research pipeline
+نعمل على تطوير معمارية معيارية (Modular Architecture) تفصل مراحل المعالجة عن بعضها، وتوحّد تبادل البيانات بين النماذج، وتُسهّل استبدال المكوّنات وتجريبها وقياس أثرها بصورة مستقلة. نحافظ خلال التطوير على دفاتر تخرج 1 الأصلية وأوزان النموذج وملفات النتائج المرجعية.
 
-| Research stage | Runtime responsibility | Implementation status |
+## توزيع المراحل على الوحدات
+
+| المرحلة | الواجهة البرمجية | حالة تنفيذ النواة الجديدة |
 |---|---|---|
-| 1. Extract audio | `MediaPort.extract_audio` | Minimal FFmpeg media adapter provided |
-| 2. Train separation model | OFFLINE research/training notebook | **Not executed or migrated** |
-| 3. Separate speech/background | `SeparationPort.separate` | Interface only; notebook logic remains unchanged |
-| 4. ASR + aligned words | `TranscriptionPort.transcribe` | Interface only; source IDs/word times are validated |
-| 5. Contextual translation | `TranslationPort.translate` | Interface only; verifies all source IDs and slots survive |
-| 6. Arabic TTS | `SynthesisPort.synthesize` | Interface only |
-| 7. Duration fitting | `DurationPort.align` | Interface only |
-| 8. Lip synchronization (optional) | `LipSyncPort.sync` | Interface only; bypassable |
-| 9. Re-mix with background | `MixingPort.mix` | FFmpeg **basic baseline** adapter provided |
-| 10. Final video render | `MediaPort.render` | Minimal FFmpeg adapter provided |
+| 1. استخراج الصوت | `MediaPort.extract_audio` | تنفيذ أساسي باستخدام FFmpeg |
+| 2. تدريب نموذج فصل الضجيج | دفتر التدريب `speech_noise_separation_Model.ipynb` | يحتفظ بمسار التطوير السابق؛ التدريب خارج مسار الاستدلال |
+| 3. فصل الكلام والخلفية | `SeparationPort.separate` | واجهة تكامل؛ نقل نموذج الفصل قيد العمل |
+| 4. التفريغ ومحاذاة الكلمات | `TranscriptionPort.transcribe` | واجهة تكامل مع التحقق من بيانات المقاطع |
+| 5. الترجمة السياقية | `TranslationPort.translate` | واجهة تكامل تتحقق من ثبات المعرّفات والتوقيت |
+| 6. توليد الكلام العربي | `SynthesisPort.synthesize` | واجهة تكامل |
+| 7. مواءمة مدة الكلام | `DurationPort.align` | واجهة تكامل |
+| 8. مزامنة الشفاه (اختيارية) | `LipSyncPort.sync` | واجهة تكامل قابلة للتجاوز |
+| 9. إعادة مزج الخلفية | `MixingPort.mix` | تنفيذ FFmpeg أساسي، يحتاج استكمال تحسينات المزج |
+| 10. إخراج الفيديو | `MediaPort.render` | تنفيذ أساسي باستخدام FFmpeg |
 
-## What is actually runnable?
+## مكوّنات النواة المنجزة
 
-- Pure data, SRT formatting, command construction, and the **pipeline with injected test doubles**.
-- The FFmpeg adapter can be invoked independently with installed FFmpeg and valid media, but this commit **does not run it on actual audio/video**.
-- There are no real registered adapters yet for Demucs, DualStreamResUNet, WhisperX, Gemini/Groq, TTS, duration adjustment, or MuseTalk. Therefore **do not advertise the end-to-end system as operational**.
-- The lightweight unit tests mock subprocesses and model interfaces. They do **not** validate sound quality, translations, training, GPU execution or the final MP4.
-- A `manifest.json` is written only after an explicitly invoked pipeline run returns existing output artifacts. It records source segments and word-level alignment without mutation; it is not a scientific evaluation report.
+- `data.py`: تعريف المقاطع والكلمات والطوابع الزمنية ومخرجات المراحل في سجلات ثابتة.
+- `pipeline.py`: تنظيم تدفق المراحل وتحقق تطابق معرّفات المقاطع وتوقيت الترجمة وتكوين مجلد تشغيل مستقل.
+- `media.py`: أوامر FFmpeg واستخراج الصوت والمزج الأساسي وإخراج الفيديو.
+- `subtitles.py`: إنشاء نص SRT بالترميز العربي دون تغيير التوقيت الأصلي.
+- `tests/`: اختبارات آلية مع بدائل محاكية للنماذج والمخرجات، دون تحميل نماذج أو الاتصال بخدمات خارجية.
 
-## Design decisions
+## معايير التكامل
 
-- Preserve original notebooks and their outputs byte-for-byte under `notebooks/`.
-- Inject adapters into `PipelinePorts`; **importing the library cannot invoke models or external APIs**.
-- Training runs separately, never during inference.
-- Initial tests assume one main instructor, not diarization or overlapping speaker separation.
-- Original word-level timestamps and source IDs are immutable; translated segment slots must match by ID and timing.
-- Fail loudly when an adapter produces no artifact. Use unique `run_id` directories and refuse overwriting existing run folders.
-- Basic `amix` can clip and does not implement the notebook's sidechain ducking or LUFS normalization; use only for future baseline comparisons.
+1. تثبيت معرّف كل مقطع وتوقيت كلماته الأصلية من مرحلة ASR إلى مرحلة إخراج الفيديو.
+2. الاحتفاظ بالخلفية الصوتية وإعادة استخدامها في المزج النهائي.
+3. فصل التدريب (Offline) عن معالجة الفيديو أثناء التشغيل (Inference).
+4. استخدام `run_id` مستقل لكل تجربة مع حفظ `manifest.json` لمخرجات التنفيذ.
+5. التعامل مع مزامنة الشفاه باعتبارها خطوة تُنفّذ عندما تنطبق شروط الفيديو.
+6. اعتماد واجهات التكامل لإجراء مقارنات Baseline وAblation دون تغيير بقية النظام.
 
-## Safety and reproducibility
+## حالة التحقق
 
-No paid API, GPU, video processing, model load, or network action is part of these unit tests. A future real integration must have explicit opt-in to external providers, dataset/run manifests, pinned dependencies, benchmark validation and licensing review.
+**اجتازت اختبارات الوحدات الأساسية فحص GitHub Actions.** يغطي هذا الفحص صحة نماذج البيانات وتنظيم التدفق وواجهات FFmpeg باستخدام عمليات محاكاة، ولا يشمل تنفيذ نماذج الفصل أو WhisperX أو خدمات الترجمة وTTS أو إنتاج فيديو فعلي. سنُضيف اختبارات التكامل والتقييم السمعي والزمني تدريجيًا عند ربط النماذج.
+
+المزج الحالي يستخدم `amix` كتنفيذ تأسيسي، ولا يمثّل بعد معالجة `sidechain ducking` أو ضبط الشدة الصوتية في دفاتر التجارب السابقة.

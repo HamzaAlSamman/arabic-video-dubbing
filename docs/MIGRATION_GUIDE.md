@@ -1,34 +1,38 @@
-# Graduation-1 notebooks → source modules: migration map
+# خطة نقل مكونات تخرج 1 إلى الوحدات البرمجية
 
-**This is a staged refactor, not a rewrite of old findings.**
+## استراتيجية التطوير
 
-| Legacy notebook section | Target interface/file | Migration state |
+نعتمد النقل المرحلي لوظائف الدفاتر إلى وحدات مستقلة قابلة للاختبار، مع إبقاء ملفات Colab الأصلية والأوزان دون تغيير. نستفيد من التنفيذ السابق بدل إعادة بناء المراحل من الصفر، ونفصل تحسين المعمارية عن إثبات الأداء البحثي.
+
+| الوظيفة في تخرج 1 | الوحدة المستهدفة | التقدم الحالي |
 |---|---|---|
-| Setup and Google Drive | Future `config/` and runtime adapters | Not migrated; old notebook preserved |
-| FFmpeg audio extraction and final render | `media.py` (`FFmpegMedia`) | Implemented minimal baseline; not a byte-for-byte copy |
-| Demucs + custom denoiser and `best_model.pth` | `SeparationPort` | Interface only; must verify model/checkpoint |
-| WhisperX ASR/alignment | `TranscriptionPort` | Interface only; immutable segment and word schemas added |
-| Gemini/Groq and translation prompt | `TranslationPort` | Interface only; original provider prompts unchanged in notebooks |
-| ElevenLabs, Edge TTS, XTTS v2 | `SynthesisPort` | Interface only; no credentials or provider calls |
-| Time fitting | `DurationPort` | Interface only; no actual waveform changes |
-| MuseTalk/CodeFormer | Optional `LipSyncPort` | Interface only; historical outcomes not verified |
-| FFmpeg audio mixing | `FFmpegBasicMixer` | Simplified baseline, not sidechain ducking |
-| SRT output | `subtitles.to_srt` | Pure helper; no original timestamps edited |
+| إعداد Colab ومسارات Google Drive | إعدادات وموصلات التشغيل | ضمن خطة التكامل |
+| استخراج الصوت وإخراج الفيديو باستخدام FFmpeg | `media.py` / `FFmpegMedia` | أُنجز تنفيذ أساسي مستقل |
+| Demucs ونموذج DualStreamResUNet | `SeparationPort` | واجهة جاهزة؛ يتبعها نقل الاستدلال والتحقق من الأوزان |
+| WhisperX والتوقيت على مستوى الكلمة | `TranscriptionPort` | واجهة جاهزة وسجلات ثابتة للمقاطع والكلمات |
+| Gemini وGroq والترجمة السياقية | `TranslationPort` | واجهة جاهزة والتحقق من ثبات المعرّفات |
+| XTTS v2 وElevenLabs وخيارات TTS | `SynthesisPort` | واجهة جاهزة؛ ربط المزوّدات لاحقًا |
+| ضبط مدة الكلام | `DurationPort` | واجهة جاهزة |
+| MuseTalk وتحسين الصورة | `LipSyncPort` | واجهة اختيارية جاهزة؛ تكامل النماذج لاحقًا |
+| إعادة المزج باستخدام FFmpeg | `FFmpegBasicMixer` | تنفيذ أساسي؛ تحسين المزج جزء من التطوير اللاحق |
+| تنسيق الترجمات | `subtitles.to_srt` | دالة مستقلة قابلة للاختبار |
 
-The notebooks also include diarization and gender detection. Those features are **historical** and explicitly outside the currently approved research scope.
+استُخدمت وظائف تحديد المتحدثين في إحدى نسخ تخرج 1، لكنها ليست ضمن نطاق العمل الحالي الذي يركّز على محاضر أساسي واحد.
 
-## Next milestones (not completed in this PR)
+## خطوات التنفيذ التالية
 
-1. Verify checkpoint provenance, model architecture, license and inference I/O before implementing separation.
-2. Add a WhisperX adapter that preserves the original IDs and word-alignment timings, with isolated fixtures.
-3. Implement translator and TTS provider adapters behind explicit flags and mocks, never embedding secrets.
-4. Add duration, background mixing and lip-sync integration with offline test fixtures.
-5. Establish a dataset card, baseline and ablation tests against independent references; do not turn draft targets into measured results.
+1. مطابقة بنية نموذج الفصل مع الأوزان وتوثيق مواصفات إدخال الصوت وإخراجه.
+2. بناء واجهة WhisperX مع اختبارات للمقاطع وتوقيت الكلمات ومعرّفاتها.
+3. ربط الترجمة وتوليد الصوت عبر واجهات واضحة لإعداد المفاتيح والمزوّدات.
+4. استكمال مواءمة المدة ومزج الصوت مع الخلفية ومزامنة الشفاه عند الحاجة.
+5. إنشاء اختبارات تكامل على بيانات اختبار محددة، يليها تقييم جودة المخرجات وزمن التنفيذ والتكلفة.
 
-To run **core tests only** (Python 3.10+; no packages required):
+## إجراء الاختبارات الحالية
+
+تُنفّذ اختبارات النواة الأساسية محليًا دون خدمات سحابية أو نماذج كبيرة:
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-Do not run the original notebook cells automatically as part of these tests.
+لا تعتمد هذه الاختبارات على ملفات Notebook القديمة أو على تشغيل GPU. يبدأ تقييم End-to-End بعد اكتمال ربط المكونات وتثبيت بيانات التقييم.
