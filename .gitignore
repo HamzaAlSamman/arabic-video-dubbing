@@ -1,0 +1,42 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# Python / notebooks
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.envrc
+.pytest_cache/
+.mypy_cache/
+
+# Notebook run artifacts and data
+runtime/
+runs/
+outputs/
+output/
+cache/
+tmp/
+*.log
+*.wav
+*.flac
+*.mp3
+*.mp4
+*.mkv
+
+# Large model files: existing tracked checkpoint is retained by Git
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Local OS files
+.DS_Store
+Thumbs.db
