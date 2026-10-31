@@ -61,8 +61,8 @@
 
 ```text
 arabic-video-dubbing/
-├── README.md
-├── .gitignore
+├── .github/
+│   └── workflows/core-tests.yml
 ├── notebooks/
 │   ├── graduation-1/
 │   │   ├── Arabic_Dubbing_System.ipynb
@@ -70,18 +70,40 @@ arabic-video-dubbing/
 │   └── experiments/
 │       └── speech_noise_separation_Model.ipynb
 ├── models/
-│   └── checkpoints/
-│       └── best_model.pth
-└── docs/
-    ├── PROJECT_STATUS.md
-    ├── RESEARCH_METHOD.md
-    ├── FILE_MANIFEST.md
-    ├── graduation-1/
-    │   ├── تقرير التخرج 1 (4).pdf
-    │   └── دبلجة الفيديوهات التعليمية إلى العربية  سيمنار 1.pdf
-    └── archive/
-        └── README_legacy.md
+│   └── checkpoints/best_model.pth
+├── src/
+│   └── arabic_dubbing/
+│       ├── data.py
+│       ├── media.py
+│       ├── pipeline.py
+│       └── subtitles.py
+├── tests/
+│   ├── test_data.py
+│   ├── test_media.py
+│   └── test_pipeline.py
+├── docs/
+│   ├── graduation-1/
+│   │   ├── تقرير التخرج 1 (4).pdf
+│   │   └── دبلجة الفيديوهات التعليمية إلى العربية  سيمنار 1.pdf
+│   ├── graduation-2/
+│   │   ├── تقرير مشروع تخرج 2 - سيمنار 1.pdf
+│   │   └── عرض تقديمي مشروع تخرج 2 - سيمنار 1.pdf
+│   ├── archive/README_legacy.md
+│   ├── ARCHITECTURE.md
+│   ├── MIGRATION_GUIDE.md
+│   ├── PROJECT_STATUS.md
+│   ├── RESEARCH_METHOD.md
+│   └── FILE_MANIFEST.md
+├── .gitignore
+├── pyproject.toml
+└── README.md
 ```
+
+
+### وثائق تخرج 2
+
+- [تقرير مشروع تخرج 2 — سيمنار 1](docs/graduation-2/تقرير مشروع تخرج 2 - سيمنار 1.pdf)
+- [العرض التقديمي لمشروع تخرج 2 — سيمنار 1](docs/graduation-2/عرض تقديمي مشروع تخرج 2 - سيمنار 1.pdf)
 
 ### دفاتر المشروع
 
@@ -112,6 +134,7 @@ arabic-video-dubbing/
 - [منهجية البحث والتقييم](docs/RESEARCH_METHOD.md)
 - [سجل نقل الملفات والحفاظ على النسخ الأصلية](docs/FILE_MANIFEST.md)
 - [وثائق مشروع تخرج 1](docs/graduation-1/)
+- [وثائق مشروع تخرج 2 والسيمنار](docs/graduation-2/)
 - [الإصدار السابق من README للأرشفة](docs/archive/README_legacy.md)
 
 ## البنية البرمجية قيد التطوير
